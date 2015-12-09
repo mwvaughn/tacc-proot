@@ -1,0 +1,38 @@
+#!/bin/bash
+
+IMAGE=$1
+TACC_PROOT_BASE=
+
+usage () {
+
+    echo "proot $IMAGE [proot-opts]"
+    exit 0
+
+}
+
+get_base () {
+
+    TMP=$(cat $HOME/.tacc-proot.rc)
+    TACC_PROOT_BASE=$TMP
+
+}
+
+err () {
+    echo "Error: $@"
+    exit 1
+}
+
+get_base
+
+if [ -z "$IMAGE" ];
+then
+    usage
+fi
+
+IMG_DIR_DEST="$TACC_PROOT_BASE/images/$IMAGE"
+if [ ! -d "$IMG_DIR_DEST" ];
+then
+    err "$IMG_NAME does not exist. Please create it with image-init"
+fi
+
+bin/proot_x86_64 -R "$IMG_DIR_DEST" -w /root $@

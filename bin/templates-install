@@ -1,0 +1,39 @@
+#!/bin/bash
+
+REGISTRY=$1
+TACC_PROOT_BASE=
+
+get_base () {
+
+    TMP=$(cat $HOME/.tacc-proot.rc)
+    TACC_PROOT_BASE=$TMP
+
+}
+
+err () {
+    echo "Error: $@"
+    exit 1
+}
+
+get_base
+
+if [ -z "$REGISTRY" ];
+then
+    REGISTRY="$TACC_PROOT_BASE/registry.tsv"
+fi
+
+if [ ! -f "$REGISTRY" ];
+then
+    err "Registry $REGISTRY doesn't exist or isn't readable"
+fi
+
+while read p; do
+    tag=$(echo $p | awk '{print $1}')
+    name=$(echo $p | awk '{print $2}')
+    uri=$(echo $p | awk '{print $3}')
+    echo "Installing $tag..."
+    mkdir -p "$TACC_PROOT_BASE/templates/$tag"
+        curl -skL -o "$TACC_PROOT_BASE/templates/$tag/$name" "$uri"
+    echo "Done."
+done <$REGISTRY
+

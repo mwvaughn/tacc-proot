@@ -1,0 +1,69 @@
+#!/bin/bash
+
+IMG_NAME=$1
+IMG_TEMPLATE=$2
+TACC_PROOT_BASE=
+
+get_base () {
+
+    TMP=$(cat $HOME/.tacc-proot.rc)
+    TACC_PROOT_BASE=$TMP
+
+}
+
+err () {
+    echo "Error: $@"
+    exit 1
+}
+
+usage () {
+
+    echo "image-init NAME TEMPLATE"
+    exit 0
+
+}
+
+get_base
+
+if [ -z "$IMG_NAME" ];
+then
+    usage
+fi
+
+if [ -z "$IMG_TEMPLATE" ];
+then
+    usage
+fi
+
+IMAGEDIR="$TACC_PROOT_BASE/images"
+if [ ! -d "$IMAGEDIR" ];
+then
+    err "Image directory $IMAGEDIR is unavailable"
+fi
+IMG_DIR_DEST="$IMAGEDIR/$IMG_NAME"
+if [ -d "$IMG_DIR_DEST" ];
+then
+    err "$IMG_NAME already exists!"
+fi
+
+TEMPSDIR="$TACC_PROOT_BASE/templates"
+if [ ! -d "$TEMPSDIR" ];
+then
+    err "Templates directory $TEMPSDIR is unavailable"
+fi
+if [ ! -d "$TEMPSDIR/$IMG_TEMPLATE" ];
+then
+    err "No such template $IMG_TEMPLATE"
+fi
+
+echo "Images: $IMAGEDIR"
+echo "Templates: $TEMPSDIR"
+echo "Destination: $IMG_DIR_DEST"
+
+echo "Building $IMG_NAME from $IMG_TEMPLATE..."
+TS=$(date +%s)
+mkdir -p "$IMG_DIR_DEST"
+tar -C "$IMG_DIR_DEST" -xf "$TACC_PROOT_BASE/templates/$IMG_TEMPLATE/rootfs.tar.xz" > /dev/null 2>&1
+echo -e "$IMG_TEMPLATE\n$TS" > "$IMAGEDIR/$IMG_NAME/etc/tacc-proot-baseimage"
+echo "Done"
+

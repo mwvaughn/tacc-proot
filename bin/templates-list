@@ -1,0 +1,27 @@
+#!/bin/bash
+
+get_base () {
+
+    TMP=$(cat $HOME/.tacc-proot.rc)
+    TACC_PROOT_BASE=$TMP
+
+}
+
+err () {
+    echo "Error: $@"
+    exit 1
+}
+
+get_base
+
+TEMPSDIR="$TACC_PROOT_BASE/templates"
+
+if [ ! -d "$TEMPSDIR" ];
+then
+    err "Templates directory $TEMPSDIR is unavailable"
+fi
+
+templates=$(find $TEMPSDIR -mindepth 1 -type 'd' -exec basename {} \; | sort -k1)
+count=$(echo "$templates" | wc -l)
+echo "Templates: $count"
+echo "$templates"

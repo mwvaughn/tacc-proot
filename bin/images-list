@@ -1,0 +1,29 @@
+#!/bin/bash
+
+get_base () {
+
+    TMP=$(cat $HOME/.tacc-proot.rc)
+    TACC_PROOT_BASE=$TMP
+
+}
+
+err () {
+    echo "Error: $@"
+    exit 1
+}
+
+get_base
+
+IMAGEDIR="$TACC_PROOT_BASE/images"
+echo $IMAGEDIR
+#exit 0
+
+if [ ! -d "$IMAGEDIR" ];
+then
+    err "Image directory $IMAGEDIR is unavailable"
+fi
+
+images=$(find "$IMAGEDIR" -maxdepth 1 -mindepth 1 -type 'd' -exec basename {} \; | sort -k1)
+count=$(echo $images | wc -l)
+echo "Images: $count"
+echo "$images"
